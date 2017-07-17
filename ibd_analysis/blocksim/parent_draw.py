@@ -8,7 +8,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sys
 sys.path.append('../analysis_popres/')
-from analysis_popres.hetero_sharing import migration_matrix
+#from analysis_popres.hetero_sharing import migration_matrix
+from hetero_sharing import migration_matrix
 #from position_update_raphael import position_update_raphael
 
 
@@ -308,7 +309,7 @@ class HeterogeneousDraw(DrawParent):
     pop_sizes = []
     sigma = []
     barrier_pos = 0
-    Migration_matrix = []
+    cumulative_density = []
     
     def __init__(self, *args):
         '''Initializes Parent.'''
@@ -325,7 +326,8 @@ class HeterogeneousDraw(DrawParent):
         self.draw_list = self.generate_draw_list() # Generates Draw List
         self.pop_sizes = np.maximum(pop_sizes, [0,0])
         #DrawParent.__init__(self, draw_list_len, sigmas, grid_size + grid_size%2)
-        self.Migration_matrix = migration_matrix(self.grid_size, self.sigma**2, self.pop_sizes)
+        Migration_matrix = migration_matrix(self.grid_size, self.sigma**2, self.pop_sizes)
+        self.cumulative_density = np.cumsum(Migration_matrix.todense(), axis=0)
         
     def generate_draw_list(self):
         ''' Generates a list of seeds, ie random numbers between 0 and 1. '''
@@ -333,10 +335,9 @@ class HeterogeneousDraw(DrawParent):
     
     def draw_parent(self, current):
         current = current[0] + self.grid_size * current[1] # convert to x + L* y coordinates
-        cumulative_density = np.cumsum(self.Migration_matrix[:, current].todense())
         seed=self.draw_seed()
         # we look for the first position for which the cumulative density becomes greater than the seed
-        new = np.argmax(cumulative_density>seed)
+        new = np.argmax(self.cumulative_density[:,current]>seed)
         # convert back to (x, y) coordinates
         parent=np.array([new % self.grid_size, np.int(np.floor(new / self.grid_size))])
         return parent
