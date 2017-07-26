@@ -42,6 +42,8 @@ class MultiRunHetero(object):
     drawlist_length = 1000  # Variable for how many random Variables are drawn simultaneously.
     max_t = 200  # Runs the Simulations for time t.
     barrier_pos = 100  # The Position of the Barrier
+    
+    grid = []
 
     # The Parameters of the 8 Scenarios.
     sigmas = [[0.3, 0.5], [0.3, 0.5], [0.4, 0.4], [0.4, 0.4], [0.3, 0.5], [0.3, 0.5], [0.3, 0.5], [0.3, 0.5]]
@@ -173,6 +175,47 @@ class MultiRunHetero(object):
         if data_set_nr == 0:
             print("To Implement")
         print("Run Complete UUUUHHH YYEEEEAHH!")
+    
+    def simulate(self, data_set_nr, scenario=0):
+        
+        print("Doing run %i for Scenario %i" % (data_set_nr, scenario))
+        
+        # Makes the Grid and sets all Parameters
+        grid = factory_Grid(model="hetero") # Creates Grid with Default Parameters
+        grid = self.set_grid_parameters(grid, scenario=scenario)  # Resets this Default Parameters
+        grid.reset_grid()  # Delete everything and re-initializes Grid
+        
+        
+        # Set the Samples 
+        print(self.position_list[:20])
+        grid.set_samples(self.position_list)  # Set the samples
+        # Runs the Simulations for time t
+        grid.update_t(self.max_t)  # Do the actual run
+        
+        self.grid = grid
+    
+    def analyse(self, data_set_nr, scenario=0):
+        grid = self.grid
+        # Do the maximum Likelihood estimation
+        # mle_ana = grid.create_MLE_object(bin_pairs=True, plot=True)
+        mle_ana = grid.create_MLE_object(reduce_start_list=True, plot=True)  # Create the MLE-object
+        #mle_ana.create_mle_model("constant", grid.chrom_l, [1.0, 1.0], diploid=False)  # Runs the analysis. 
+        mle_ana.create_mle_model("hetero", grid.chrom_l, [np.array([50.0, 50.0]), np.array([0.4,0.4])], diploid=False)
+        mle_ana.mle_analysis_error()  # Analyses the samples
+        
+        ci_s = mle_ana.ci_s
+        estimates = mle_ana.estimates
+        
+        
+        print("RUN COMPLETE!!")
+        
+        self.save_estimates(estimates, ci_s, data_set_nr, scenario)
+        print("Results SAVED!") 
+        
+        # Save addtional Infos about the run
+        if data_set_nr == 0:
+            print("To Implement")
+        print("Run Complete UUUUHHH YYEEEEAHH!")
         
 
 #########################################################################################
@@ -199,7 +242,8 @@ if __name__ == "__main__":
 '''
 
 multirun = MultiRunHetero("./testfolder", 10)
-multirun.single_run(1, 0)
+multirun.simulate(1, 0)
+multirun.analyse(1, 0)
 
 
 

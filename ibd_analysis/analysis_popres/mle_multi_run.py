@@ -408,7 +408,7 @@ class MLE_analyse(object):
         results = ml_estimator.fit()  # method="nelder-mead"
         # results0 = ml_estimator.fit(method="BFGS")  # Do the actual fit. method="BFGS" possible
         self.estimates = results.params  # Save the paramter estimates (0: c 1:sigma ...)
-        self.ci_s = results.conf_int()
+        # self.ci_s = results.conf_int()
 
         fisher_info = np.matrix(ml_estimator.hessian(results.params))  # Get the Fisher Info matrix
         corr_mat = cov2corr(-fisher_info.I)

@@ -316,6 +316,7 @@ class MLE_analyse(object):
         start_param: What Start Parameters to Use
         all_chrom: Whether to use the formula for all chromosomes'''
 
+            start_params = [0.001530, 60, 1, 0]
         if model == "constant":
             bl_shr_density = uniform_density
             start_params = [0.01, 70]
@@ -330,7 +331,6 @@ class MLE_analyse(object):
             start_params = [0.02, 60, 0.2, 0.01]
         elif model == "ddd":
             bl_shr_density = powergrowth_density_dd
-            start_params = [0.001530, 60, 1, 0]
         else: 
             print("No suitable function found")
             
